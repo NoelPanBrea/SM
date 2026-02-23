@@ -4,7 +4,7 @@ using UnityEngine.AI;
 
 // IMPLEMENTAR:
 // Cono de visión (HECHO)
-// Sensor escuchar, es decir, que se acerque a la zona donde ha oído al ladrón
+// Sensor escuchar, es decir, que se acerque a la zona donde ha oído al ladrón (HECHO)
 // Que siga persiguiendo al ladrón 3-4 segundos después de perderlo de vista (HECHO)
 // Actualizar zona patrulla a donde dejo de ve el ladrón
 // Stamina/resistencia (no hace falta)
@@ -131,22 +131,18 @@ public class Cerebro : MonoBehaviour
     }
 
 
-    bool EscuchaAlLadron()
+    void OnTriggerStay(Collider other)
     {
-        if (!LadronSeMueve.seMueve)
-            return false;
+        if (other.CompareTag("Sonido"))
+        {
+            Vector2 puntoAleatorio = Random.insideUnitCircle * radioFalloAudicion;
+            puntoInvestigacion = ladron.position + new Vector3(puntoAleatorio.x, 0f, puntoAleatorio.y);
+            if (estadoActual != Estado.Perseguir)
+            {
+                estadoActual = Estado.Investigar;
+            }
+            agent.destination = puntoInvestigacion;
 
-        Vector3 origen = transform.position + Vector3.up * 1.5f;
-        Vector3 direccion = ladron.position - origen;
-        float distancia = direccion.magnitude;
-
-        if (distancia > distanciaAudicion)
-            return false;
-
-        Vector2 puntoAleatorio = Random.insideUnitCircle * radioFalloAudicion;
-
-        puntoInvestigacion = ladron.position + new Vector3(puntoAleatorio.x, 0f, puntoAleatorio.y);
-
-        return true;
+        }
     }
 }
