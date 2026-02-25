@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
-
+using System.Collections.Generic;
 
 // IMPLEMENTAR:
 // Cono de visión (HECHO)
@@ -13,7 +13,8 @@ public class Cerebro : MonoBehaviour
 {
     enum Estado {Patrullar, Investigar, Perseguir}
     NavMeshAgent agent;
-    public Transform[] puntos;
+    public List<Vector3> puntos = new List<Vector3>();
+    [SerializeField] Transform[] puntosIniciales;
     public Transform ladron;
     public Cerebro_ladrón LadronSeMueve;     
     public float distanciaVision = 10f;
@@ -33,10 +34,15 @@ public class Cerebro : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
 
-        if (puntos.Length == 0)
+        foreach (Transform t in puntosIniciales)
+        {
+            puntos.Add(t.position);
+        }
+
+        if (puntos.Count == 0)
             return;
 
-        agent.destination = puntos[indiceActual].position;
+        agent.destination = puntos[indiceActual];
     }
 
 
@@ -56,9 +62,9 @@ public class Cerebro : MonoBehaviour
         }
         else
         {
+            AñadirPuntoPatrulla(ultimaPosicionConocida);
             estadoActual = Estado.Patrullar;
         }
-        Debug.Log(estadoActual);
 
         EjecutarEstado();
     }
@@ -97,13 +103,46 @@ public class Cerebro : MonoBehaviour
 
         while (nuevoIndice == indiceActual)
         {
-            nuevoIndice = Random.Range(0, puntos.Length);
+            nuevoIndice = Random.Range(0, puntos.Count);
         }
 
         indiceActual = nuevoIndice;
-        agent.destination = puntos[indiceActual].position;
+        agent.destination = puntos[indiceActual];
     }
 
+    void AñadirPuntoPatrulla(Vector3 nuevoPunto)   // NUEVA FUNCIÓN
+    {
+        // evitamos duplicados cercanos
+        float distanciaMinima = 8f;
+        foreach (Vector3 punto in puntos)
+        {
+            if (Vector3.Distance(punto, nuevoPunto) < distanciaMinima)
+            {
+                return;
+            }
+        }
+
+        // añadimos punto
+        puntos.Add(nuevoPunto);
+       
+        // eliminiamos el más alejado
+        int maxPuntos = 5;
+        if (puntos.Count > maxPuntos)
+        {
+            int indiceMasLejano = 0;
+            float maxDist = 0f;
+            for (int i = 0; i < puntos.Count; i++)
+            {
+                float d = Vector3.Distance(puntos[i], nuevoPunto);
+                if (d > maxDist)
+                {
+                    maxDist = d;
+                    indiceMasLejano = i;
+                }
+            }
+            puntos.RemoveAt(indiceMasLejano);
+        }
+    }
 
     bool VeAlLadronConAngulo()
     {
