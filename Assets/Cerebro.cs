@@ -26,6 +26,7 @@ public class Cerebro : MonoBehaviour
     Vector3 puntoInvestigacion;
     Estado estadoActual = Estado.Patrullar;
     Estado estadoAnterior;
+    float nextcomparison = 0f;
 
 
     void Start()
@@ -152,15 +153,16 @@ public class Cerebro : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Sonido"))
+        if (other.CompareTag("Sonido") && Time.time > nextcomparison)
         {
+            nextcomparison = Time.time + 1f;
             Vector2 puntoAleatorio = Random.insideUnitCircle * radioFalloAudicion;
             puntoInvestigacion = ladron.position + new Vector3(puntoAleatorio.x, 0f, puntoAleatorio.y);
             if (estadoActual != Estado.Perseguir)
             {
                 estadoActual = Estado.Investigar;
             }
-            // agent.destination = puntoInvestigacion;
+            agent.destination = puntoInvestigacion;
 
         }
     }
