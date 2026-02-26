@@ -157,7 +157,7 @@ public class Cerebro : MonoBehaviour
     void ComprobarTesoro()
     {
         agent.destination = PuntoComprobarTesoro.position;
-        if (LadrontieneTesoro)
+        if (LadrontieneTesoro.tieneTesoro)
         {
             agent.destination = PuntoHuidaLadron.position;
         }
