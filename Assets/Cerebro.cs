@@ -48,15 +48,8 @@ public class Cerebro : MonoBehaviour
 
     void Update()
     {
-        bool ve = VeAlLadronConAngulo();
 
-        if (ve)
-        {
-            estadoActual = Estado.Perseguir;
-            ultimaPosicionConocida = ladron.position;
-            tiempoUltimaVision = Time.time;
-        }
-        else if ((Time.time - tiempoUltimaVision) <= 4f)
+        if ((Time.time - tiempoUltimaVision) <= 4f)
         {
             estadoActual = Estado.Perseguir;
         }
@@ -70,22 +63,22 @@ public class Cerebro : MonoBehaviour
     }
 
     void EjecutarEstado()
-{
-    switch (estadoActual)
     {
-        case Estado.Perseguir:
-            agent.destination = ultimaPosicionConocida;
-            break;
+        switch (estadoActual)
+        {
+            case Estado.Perseguir:
+                agent.destination = ultimaPosicionConocida;
+                break;
 
-        case Estado.Investigar:
-            agent.destination = puntoInvestigacion;
-            break;
+            case Estado.Investigar:
+                agent.destination = puntoInvestigacion;
+                break;
 
-        case Estado.Patrullar:
-            Patrullar();
-            break;
+            case Estado.Patrullar:
+                Patrullar();
+                break;
+        }
     }
-}
 
 
     void Patrullar()
@@ -144,30 +137,12 @@ public class Cerebro : MonoBehaviour
         }
     }
 
-    bool VeAlLadronConAngulo()
+    public void VeAlLadron()
     {
-        Vector3 origen = transform.position + Vector3.up * 1.5f; // altura de los "ojos" del guardián
-        Vector3 direccion = ladron.position - origen;
+        estadoActual = Estado.Perseguir;
+        ultimaPosicionConocida = ladron.position;
+        tiempoUltimaVision = Time.time;
 
-        float distancia = direccion.magnitude;
-
-        if (distancia > distanciaVision)
-            return false;
-
-        Vector3 direccionNormalizada = direccion.normalized;
-        float angulo = Vector3.Angle(transform.forward, direccionNormalizada);
-        if (angulo > anguloVision / 2f)
-            return false;
-
-        RaycastHit hit;
-
-        if (Physics.Raycast(origen, direccionNormalizada, out hit, distancia))
-        {
-            if (hit.transform == ladron)
-                return true;
-        }
-
-        return false;
     }
 
 
