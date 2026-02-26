@@ -4,8 +4,6 @@ using UnityEngine.InputSystem;
 public class Cerebro_ladrón : MonoBehaviour
 {
     public float speed = 5f;
-    public float gravity = -9.81f;
-    // private Camera cameraComponent = cameraObject.GetComponent<Camera>();
 
     public bool seMueve;
 
@@ -28,10 +26,10 @@ public class Cerebro_ladrón : MonoBehaviour
         if (Keyboard.current.jKey.isPressed) z = -1;
         if (Keyboard.current.lKey.isPressed) z = 1;
 
-        Vector3 move = new Vector3(x, 0, y) * speed * Time.deltaTime;
+        Vector3 move = new Vector3(x, 0, y).normalized * speed * 1.41f * Time.deltaTime;
         transform.Translate(move);
         seMueve = move.magnitude > 0;
-        Vector3 moveCamera = new Vector3(0, z, 0) * (20*speed) * Time.deltaTime;
+        Vector3 moveCamera = new Vector3(0, z, 0) * 100 * Time.deltaTime;
         transform.Rotate(moveCamera);
 
 
