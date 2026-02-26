@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
+
 
 // IMPLEMENTAR:
 // Cono de visión (HECHO)
@@ -178,6 +180,19 @@ public class Cerebro : MonoBehaviour
             }
             agent.destination = puntoInvestigacion;
 
+            Vector3 direccion = ladron.position - transform.position;
+            float distancia = direccion.magnitude;
+
+            if (distancia < 2f)
+            {
+                Restart();
+            }
+
+
         }
+    }
+
+    void Restart(){
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
