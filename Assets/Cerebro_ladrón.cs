@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class Cerebro_ladrón : MonoBehaviour
 {
     public float speed = 5f;
-
+    public bool tieneTesoro = false;
     public bool seMueve;
 
     void Start()
@@ -31,7 +32,22 @@ public class Cerebro_ladrón : MonoBehaviour
         seMueve = move.magnitude > 0;
         Vector3 moveCamera = new Vector3(0, z, 0) * 100 * Time.deltaTime;
         transform.Rotate(moveCamera);
+    }
 
+    void OnTriggerStay(Collider other)
+    {
+        if (other.CompareTag("Tesoro"))
+        {
+            tieneTesoro = true;
+        }
 
+        if (other.CompareTag("Destino victoria") && tieneTesoro)
+        {
+            Restart();
+        }
+    }
+
+    void Restart(){
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
