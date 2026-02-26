@@ -39,6 +39,7 @@ public class Cerebro_ladrón : MonoBehaviour
         if (other.CompareTag("Tesoro"))
         {
             tieneTesoro = true;
+            other.gameObject.SetActive(false);
         }
 
         if (other.CompareTag("Destino victoria") && tieneTesoro)

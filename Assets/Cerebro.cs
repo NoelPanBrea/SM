@@ -19,8 +19,6 @@ public class Cerebro : MonoBehaviour
     [SerializeField] Transform[] puntosIniciales;
     public Transform ladron;
     public Cerebro_ladrón LadronSeMueve;     
-    public float distanciaVision = 10f;
-    public float anguloVision = 90;
     public float distanciaAudicion = 20f;
     public float radioFalloAudicion = 15f;
     int indiceActual = 0;

@@ -7,13 +7,15 @@ public class vista : MonoBehaviour
     public Transform posicionladron;
     public float distanciaVision = 10f;
     public float anguloVision = 90;
+    private Cerebro cerebro;
     private Vector3 origen;
     private Vector3 direccion;
 
     void Start()
     {
         visto ??= new UnityEvent();
-        visto.AddListener(Cerebro.VeAlLadron);
+        cerebro = GetComponent<Cerebro>();
+        if (cerebro != null) visto.AddListener(cerebro.VeAlLadron);
     }
 
     // Update is called once per frame
