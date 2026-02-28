@@ -13,12 +13,18 @@ using UnityEngine.SceneManagement;
 
 public class Cerebro : MonoBehaviour
 {
-    enum Estado {Patrullar, Investigar, Perseguir}
+    enum Estado {Patrullar, Investigar, Perseguir, ComprobarTesoro}
     NavMeshAgent agent;
     public List<Vector3> puntos = new List<Vector3>();
     [SerializeField] Transform[] puntosIniciales;
+    public Transform PuntoComprobarTesoro;
+    public Transform PuntoHuidaLadron;
     public Transform ladron;
-    public Cerebro_ladrón LadronSeMueve;     
+    public Cerebro_ladrón LadronSeMueve;
+    public Cerebro_ladrón LadrontieneTesoro;    
+    public float distanciaVision = 10f;
+    public float anguloVision = 90;
+    public float distanciaAudicion = 20f;
     public float radioFalloAudicion = 15f;
     int indiceActual = 0;
     float tiempoUltimaVision = -Mathf.Infinity;
@@ -72,9 +78,13 @@ public class Cerebro : MonoBehaviour
                 agent.destination = puntoInvestigacion;
                 break;
 
-            case Estado.Patrullar:
-                Patrullar();
-                break;
+        case Estado.Patrullar:
+            Patrullar();
+            break;
+
+        case Estado.ComprobarTesoro:
+            ComprobarTesoro();
+            break;
         }
     }
 
@@ -140,6 +150,15 @@ public class Cerebro : MonoBehaviour
         estadoActual = Estado.Perseguir;
         ultimaPosicionConocida = ladron.position;
         tiempoUltimaVision = Time.time;
+    }
+
+    void ComprobarTesoro()
+    {
+        agent.destination = PuntoComprobarTesoro.position;
+        if (LadrontieneTesoro.tieneTesoro)
+        {
+            agent.destination = PuntoHuidaLadron.position;
+        }
     }
 
     public void EscuchaAlLadron()
