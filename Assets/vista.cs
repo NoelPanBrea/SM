@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class vista : MonoBehaviour
+public class Vista : MonoBehaviour
 {
     public UnityEvent visto;
     public Transform posicionladron;
