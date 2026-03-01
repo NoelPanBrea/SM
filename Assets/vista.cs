@@ -3,17 +3,17 @@ using UnityEngine.Events;
 
 public class Vista : MonoBehaviour
 {
-    public UnityEvent visto;
     public Transform posicionladron;
-    public float distanciaVision = 10f;
-    public float anguloVision = 90;
+    public float distanciaVision = 20f;
+    public float anguloVision = 210;
+    private UnityEvent<Vector3> visto;
     private Cerebro cerebro;
     private Vector3 origen;
     private Vector3 direccion;
 
     void Start()
     {
-        visto ??= new UnityEvent();
+        visto ??= new UnityEvent<Vector3>();
         cerebro = GetComponent<Cerebro>();
         if (cerebro != null) visto.AddListener(cerebro.VeAlLadron);
     }
@@ -25,7 +25,7 @@ public class Vista : MonoBehaviour
         direccion = posicionladron.position - origen;
         if (EnRango() && EnAngulo() && SinObstaculos())
         {
-            visto.Invoke();
+            visto.Invoke(posicionladron.position);
         }
     }
 

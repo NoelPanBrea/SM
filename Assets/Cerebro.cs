@@ -1,6 +1,5 @@
 using UnityEngine;
 using UnityEngine.AI;
-using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 
@@ -13,177 +12,81 @@ using UnityEngine.SceneManagement;
 
 public class Cerebro : MonoBehaviour
 {
-    enum Estado {Patrullar, Investigar, Perseguir, ComprobarTesoro}
-    NavMeshAgent agent;
-    public List<Vector3> puntos = new List<Vector3>();
-    [SerializeField] Transform[] puntosIniciales;
+    public Estado estado;
+    public Patrullar patrullar;
+    public Investigar investigar;
+    public Perseguir perseguir;
+    public Comprobar comprobar;
     public Transform PuntoComprobarTesoro;
     public Transform PuntoHuidaLadron;
     public Transform ladron;
-    public Cerebro_ladrón LadronSeMueve;
-    public Cerebro_ladrón LadrontieneTesoro;    
-    public float distanciaVision = 10f;
-    public float anguloVision = 90;
-    public float distanciaAudicion = 20f;
-    public float radioFalloAudicion = 15f;
-    int indiceActual = 0;
-    float tiempoUltimaVision = -Mathf.Infinity;
-    Vector3 ultimaPosicionConocida;
-    Vector3 puntoInvestigacion;
-    Estado estadoActual = Estado.Patrullar;
-    Estado estadoAnterior;
-
+    public Cerebro_ladrón LadrontieneTesoro;
+    private float tiempoUltimaVision = -Mathf.Infinity;
+    private float tiempoUltimaInvestigación = -Mathf.Infinity;
+    private float tiempoUltimaComprobacion;
+    private Vector3 ultimaPosicionConocida;
+    private Vector3 puntoInvestigacion;
+    private NavMeshAgent agent;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-
-        foreach (Transform t in puntosIniciales)
-        {
-            puntos.Add(t.position);
-        }
-
-        if (puntos.Count == 0)
-            return;
-
-        agent.destination = puntos[indiceActual];
+        patrullar = GetComponent<Patrullar>();
+        perseguir = GetComponent<Perseguir>();
+        investigar = GetComponent<Investigar>();
+        comprobar = GetComponent<Comprobar>();
+        ultimaPosicionConocida = transform.position;
+        tiempoUltimaComprobacion = Time.time;
+        estado = patrullar;
     }
 
 
     void Update()
     {
-
-        if ((Time.time - tiempoUltimaVision) <= 4f)
+        if (Time.time - tiempoUltimaVision > 16f && Time.time - tiempoUltimaInvestigación > 16f
+         && Time.time - tiempoUltimaComprobacion > 20f && estado is not Perseguir && estado is not Investigar)
         {
-            estadoActual = Estado.Perseguir;
+            estado = comprobar;
+            tiempoUltimaComprobacion = (comprobar.comprobado & !comprobar.ladron.tieneTesoro) ? Time.time : tiempoUltimaComprobacion;
+            comprobar.comprobado = false;
         }
-        else
+        else if (Time.time - tiempoUltimaVision > 8f && Time.time - tiempoUltimaInvestigación > 8f)
         {
-            AñadirPuntoPatrulla(ultimaPosicionConocida);
-            estadoActual = Estado.Patrullar;
+            estado = patrullar;
+            patrullar.AñadirPuntoPatrulla(ultimaPosicionConocida);
         }
-
-        EjecutarEstado();
+        else if (estado is not Investigar)
+        {
+            estado = investigar;
+            investigar.posicion = ultimaPosicionConocida;
+            tiempoUltimaInvestigación = Time.time;
+        }
+        estado.Comportamiento();
     }
 
-    void EjecutarEstado()
+    public void VeAlLadron(Vector3 posicion)
     {
-        switch (estadoActual)
-        {
-            case Estado.Perseguir:
-                agent.destination = ultimaPosicionConocida;
-                break;
-
-            case Estado.Investigar:
-                agent.destination = puntoInvestigacion;
-                break;
-
-        case Estado.Patrullar:
-            Patrullar();
-            break;
-
-        case Estado.ComprobarTesoro:
-            ComprobarTesoro();
-            break;
-        }
-    }
-
-
-    void Patrullar()
-    {
-        if (agent.remainingDistance <= agent.stoppingDistance)
-        {
-            CambiarDestinoAleatorio();
-        }
-    }
-
-
-    void CambiarDestinoAleatorio()
-    {
-        int nuevoIndice = indiceActual;
-
-        while (nuevoIndice == indiceActual)
-        {
-            nuevoIndice = Random.Range(0, puntos.Count);
-        }
-
-        indiceActual = nuevoIndice;
-        agent.destination = puntos[indiceActual];
-    }
-
-    void AñadirPuntoPatrulla(Vector3 nuevoPunto)   // NUEVA FUNCIÓN
-    {
-        // evitamos duplicados cercanos
-        float distanciaMinima = 8f;
-        foreach (Vector3 punto in puntos)
-        {
-            if (Vector3.Distance(punto, nuevoPunto) < distanciaMinima)
-            {
-                return;
-            }
-        }
-
-        // añadimos punto
-        puntos.Add(nuevoPunto);
-       
-        // eliminiamos el más alejado
-        int maxPuntos = 5;
-        if (puntos.Count > maxPuntos)
-        {
-            int indiceMasLejano = 0;
-            float maxDist = 0f;
-            for (int i = 0; i < puntos.Count; i++)
-            {
-                float d = Vector3.Distance(puntos[i], nuevoPunto);
-                if (d > maxDist)
-                {
-                    maxDist = d;
-                    indiceMasLejano = i;
-                }
-            }
-            puntos.RemoveAt(indiceMasLejano);
-        }
-    }
-
-    public void VeAlLadron()
-    {
-        estadoActual = Estado.Perseguir;
-        ultimaPosicionConocida = ladron.position;
+        estado = perseguir;
+        perseguir.posicion = posicion;
+        ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
     }
 
-    void ComprobarTesoro()
+    public void EscuchaAlLadron(Vector3 puntoInvestigacion)
     {
-        agent.destination = PuntoComprobarTesoro.position;
-        if (LadrontieneTesoro.tieneTesoro)
+        if (estado is not Perseguir)
         {
-            agent.destination = PuntoHuidaLadron.position;
+            estado = investigar;
+            investigar.posicion = puntoInvestigacion;
+            tiempoUltimaInvestigación = Time.time;
         }
-    }
 
-    public void EscuchaAlLadron()
-    {
-        Vector2 puntoAleatorio = Random.insideUnitCircle * radioFalloAudicion;
-        puntoInvestigacion = ladron.position + new Vector3(puntoAleatorio.x, 0f, puntoAleatorio.y);
-        if (estadoActual != Estado.Perseguir)
-        {
-            estadoActual = Estado.Investigar;
-        }
-        agent.destination = puntoInvestigacion;
 
     }
 
     public void TocaAlLadron()
     {
-        Vector3 direccion = ladron.position - transform.position;
-        float distancia = direccion.magnitude;
-        if (distancia < 2f)
-            {
-                Restart();
-            }
-    }
-
-    void Restart(){
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
 }

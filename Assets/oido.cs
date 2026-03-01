@@ -3,13 +3,15 @@ using UnityEngine.Events;
 
 public class Oido : MonoBehaviour
 {
-    public UnityEvent escuchado;
+    public float radioFalloAudicion = 15f;
+    private UnityEvent<Vector3> escuchado;
     private Cerebro cerebro;
-    private float espera_audicion = 0f;
+    private Vector3 puntoInvestigacion;
+
 
     void Start()
-    {
-        escuchado ??= new UnityEvent();
+    {   
+        escuchado ??= new UnityEvent<Vector3>();
         cerebro = GetComponent<Cerebro>();
         if (cerebro != null) escuchado.AddListener(cerebro.EscuchaAlLadron);
     }
@@ -21,10 +23,12 @@ public class Oido : MonoBehaviour
 
     void OnTriggerStay(Collider other)
     {
-        if (other.CompareTag("Sonido") && Time.time > espera_audicion )
+
+        if (other.CompareTag("Sonido") && other.GetComponent<Cerebro_ladrón>().seMueve)
         {
-            espera_audicion = Time.time + 1f;
-            escuchado.Invoke();
+            Vector2 puntoAleatorio = Random.insideUnitCircle * radioFalloAudicion;
+            puntoInvestigacion = other.transform.position + new Vector3(puntoAleatorio.x, 0f, puntoAleatorio.y);
+            escuchado.Invoke(puntoInvestigacion);
         }
     }
 }
