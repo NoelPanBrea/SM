@@ -58,6 +58,13 @@ ExportedObj/
 *.meta
 *.fbx
 *.prefab
+*.wav
+*.tif
+*.psd
+*.jpg
+*.pdf
+*.controller
+*.lighting
 *.png
 *.asset
 *.slnx
