@@ -11,7 +11,7 @@ public class AgenteComunicativo : MonoBehaviour {
     public static void EnviarBroadcast(Mensaje mensaje) {
         foreach (var agente in agentes) {
             // no nos enviamos el mensaje a nosotros mismos
-            if (agente.GetGameObject() != mensjae.Emisor) {
+            if (agente.GetGameObject() != mensaje.Emisor) {
                 agente.RecibirMensaje(mensaje);
             }
         }
