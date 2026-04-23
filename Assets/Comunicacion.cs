@@ -8,14 +8,14 @@
 //     public static void RegistrarAgente(InterfazAgenteComunicativo agente) => agentes.Add(agente);
 //     public static void EliminarAgente(InterfazAgenteComunicativo agente) => agentes.Remove(agente);
 
-//     public static void EnviarBroadcast(Mensaje mensaje) {
-//         foreach (var agente in agentes) {
-//             // no nos enviamos el mensaje a nosotros mismos
-//             if (agente.GetGameObject() != mensjae.Emisor) {
-//                 agente.RecibirMensaje(mensaje);
-//             }
-//         }
-//     }
+    public static void EnviarBroadcast(Mensaje mensaje) {
+        foreach (var agente in agentes) {
+            // no nos enviamos el mensaje a nosotros mismos
+            if (agente.GetGameObject() != mensaje.Emisor) {
+                agente.RecibirMensaje(mensaje);
+            }
+        }
+    }
 
 //     public static void EnviarDirecto(GameObject receptor, Mensaje mensaje) {
 //         InterfazAgenteComunicativo agente = receptor.GetComponent<InterfazAgenteComunicativo>();
