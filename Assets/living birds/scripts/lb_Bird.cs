@@ -21,7 +21,7 @@ public class lb_Bird : MonoBehaviour {
 	public bool fleeCrows = true;
 
 	Animator anim;
-	lb_BirdController controller;
+	public lb_BirdController controller;
 
 	bool paused = false;
 	bool idle = true;
@@ -120,7 +120,7 @@ public class lb_Bird : MonoBehaviour {
 		}
 	}
 	
-	IEnumerator FlyToTarget(Vector3 target){
+	public IEnumerator FlyToTarget(Vector3 target){
 		if(Random.value < .5){
 			GetComponent<AudioSource>().PlayOneShot (flyAway1,.1f);
 		}else{
@@ -450,11 +450,11 @@ public class lb_Bird : MonoBehaviour {
 		FlyAway ();
 	}
 	
-	void FlyAway(){
+	public void FlyAway(){
 		if(!dead){
 			StopCoroutine("FlyToTarget");
 			anim.SetBool(landingBoolHash, false);
-			controller.SendMessage ("BirdFindTarget",gameObject);
+			// controller.SendMessage ("BirdFindTarget",gameObject);
 		}
 	}
 
