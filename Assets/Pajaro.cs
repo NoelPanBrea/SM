@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Pajaro : MonoBehaviour
+public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
 {
 
     void Start()
     {
-
+        AgenteComunicativo.RegistrarAgente(this);
     }
 
     // Update is called once per frame
@@ -17,7 +17,19 @@ public class Pajaro : MonoBehaviour
 
     public void VeAlLadron(Vector3 posicion)
     {
-        Debug.Log("Hola");
+        Debug.Log("Pájaro ha visto al ladrón");
+        AgenteComunicativo.EnviarBroadcast(
+            new Mensaje{Emisor = gameObject, intencion = Intencion.Inform, Contenido = "Ladron visto"});
+    }
+
+
+    public void RecibirMensaje(Mensaje mensaje)
+    {
+    }
+
+    public GameObject GetGameObject()
+    {
+        return gameObject;
     }
 }
 

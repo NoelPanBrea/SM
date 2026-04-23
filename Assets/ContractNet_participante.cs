@@ -1,7 +1,7 @@
 using UnityEngine;
 
 public class ContractNet_participante : MonoBehaviour, InterfazAgenteComunicativo {
-    void Start() => InterfazAgenteComunicativo.RegistrarAgente(this);
+    void Start() => AgenteComunicativo.RegistrarAgente(this);
 
 
     private void Responder(GameObject receptor, Intencion intencion, string contenido, int id) {
@@ -32,7 +32,7 @@ public class ContractNet_participante : MonoBehaviour, InterfazAgenteComunicativ
 
     private void EvaluarPropuesta(Mensaje mensaje) {
         // implementar condición para aceptar o cfp
-        if (None) {
+        if (true) {
             Responder(mensaje.Emisor, Intencion.Propose, "Acepto tu cfp. Ofrezco x para la subasta", mensaje.IDConversacion);
         } else {
             Responder(mensaje.Emisor, Intencion.Refuse, "Rechazo tu cfp", mensaje.IDConversacion);

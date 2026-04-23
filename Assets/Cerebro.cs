@@ -3,14 +3,8 @@ using UnityEngine.AI;
 using UnityEngine.SceneManagement;
 
 
-// IMPLEMENTAR:
-// Cono de visión (HECHO)
-// Sensor escuchar, es decir, que se acerque a la zona donde ha oído al ladrón
-// Que siga persiguiendo al ladrón 3-4 segundos después de perderlo de vista (HECHO)
-// Actualizar zona patrulla a donde dejo de ve el ladrón
-// Stamina/resistencia (no hace falta)
 
-public class Cerebro : MonoBehaviour
+public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 {
     public Estado estado;
     public Patrullar patrullar;
@@ -30,6 +24,7 @@ public class Cerebro : MonoBehaviour
 
     void Start()
     {
+        AgenteComunicativo.RegistrarAgente(this);
         agent = GetComponent<NavMeshAgent>();
         patrullar = GetComponent<Patrullar>();
         perseguir = GetComponent<Perseguir>();
@@ -70,6 +65,8 @@ public class Cerebro : MonoBehaviour
         perseguir.posicion = posicion;
         ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
+        AgenteComunicativo.EnviarBroadcast(
+            new Mensaje{Emisor = gameObject, intencion = Intencion.Inform, Contenido = "LadronDetectado"});
     }
 
     public void EscuchaAlLadron(Vector3 puntoInvestigacion)
@@ -80,13 +77,29 @@ public class Cerebro : MonoBehaviour
             investigar.posicion = puntoInvestigacion;
             tiempoUltimaInvestigación = Time.time;
         }
-
-
     }
 
     public void TocaAlLadron()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
+    public GameObject GetGameObject()
+    {
+        return gameObject;
+    }
+
+    public void RecibirMensaje(Mensaje mensaje)
+    {
+        if (mensaje.intencion == Intencion.Inform)
+        {
+            Debug.Log(name + " recibe información");
+
+            ultimaPosicionConocida = mensaje.Emisor.transform.position;
+            estado = perseguir;
+            perseguir.posicion = ultimaPosicionConocida;
+        }
+    }
+
 
 }

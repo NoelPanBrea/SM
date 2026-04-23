@@ -1,12 +1,13 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Net.Mime;
 
 public class AgenteIniciador : MonoBehaviour, InterfazAgenteComunicativo {
     private int ID_actual = 0;
     private bool subastaAbierta = false;
     private List<Mensaje> propuestasRecibidas = new List<Mensaje>();
 
-    void Start() => InterfazAgenteComunicativo.RegistrarAgente(this);
+    void Start() => AgenteComunicativo.RegistrarAgente(this);
 
 
     public void IniciarProtocolo() {
@@ -60,6 +61,7 @@ public class AgenteIniciador : MonoBehaviour, InterfazAgenteComunicativo {
             Emisor = gameObject,
             Receptor = receptor,
             intencion = intencion,
+            Contenido = "Ve a por el ladrón",
             IDConversacion = ID_actual
         });
     }
