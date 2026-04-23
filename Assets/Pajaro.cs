@@ -31,5 +31,11 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
     {
         return gameObject;
     }
+
+    void OnDestroy()
+    {
+        AgenteComunicativo.EliminarAgente(this);
+    }
+    
 }
 

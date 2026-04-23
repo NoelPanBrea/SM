@@ -66,7 +66,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
         AgenteComunicativo.EnviarBroadcast(
-            new Mensaje{Emisor = gameObject, intencion = Intencion.Inform, Contenido = "LadronDetectado"});
+            new Mensaje{Emisor = gameObject, intencion = Intencion.Inform, Contenido = "Ladrón detectado"});
     }
 
     public void EscuchaAlLadron(Vector3 puntoInvestigacion)
@@ -93,7 +93,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
     {
         if (mensaje.intencion == Intencion.Inform)
         {
-            Debug.Log(name + " recibe información");
+            Debug.Log(name + " recibe información: " + mensaje.Contenido);
 
             ultimaPosicionConocida = mensaje.Emisor.transform.position;
             estado = perseguir;
@@ -101,5 +101,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         }
     }
 
-
+    void OnDestroy()
+    {
+        AgenteComunicativo.EliminarAgente(this);
+    }
 }
