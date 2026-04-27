@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.SceneManagement;
@@ -21,6 +22,9 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
     private Vector3 ultimaPosicionConocida;
     private Vector3 puntoInvestigacion;
     private NavMeshAgent agent;
+    private Dictionary<GameObject, float> propuestas = new Dictionary<GameObject, float>();
+    private int ID_actual = 0;
+    private bool esperandoRespuestas = false;
 
     void Start()
     {
@@ -65,8 +69,23 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         perseguir.posicion = posicion;
         ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
+
+        Debug.Log(name + " ha visto al ladrón");
+        propuestas.Clear();
+        ID_actual++;
+        esperandoRespuestas = true;
+
         AgenteComunicativo.EnviarBroadcast(
-            new Mensaje{Emisor = gameObject, intencion = Intencion.Inform, Contenido = "Ladrón detectado"});
+            new Mensaje
+            {
+                Emisor = gameObject,
+                intencion = Intencion.Cfp,
+                Contenido = posicion.x + "," + posicion.y + "," + posicion.z,
+                IDConversacion = ID_actual
+            });
+
+        Invoke(nameof(SeleccionarGanador), 1.0f);
+
     }
 
     public void EscuchaAlLadron(Vector3 puntoInvestigacion)
@@ -82,11 +101,6 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
     public void TocaAlLadron()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public GameObject GetGameObject()
-    {
-        return gameObject;
     }
 
     public void RecibirMensaje(Mensaje mensaje)
@@ -126,6 +140,17 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 Debug.Log(name + " rechazado");
 
                 break;
+
+            case Intencion.Propose:
+
+                if (mensaje.IDConversacion == ID_actual)
+                {
+                    float valor = float.Parse(mensaje.Contenido);
+                    propuestas[mensaje.Emisor] = valor;
+                    Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
+                }
+
+                break;
         }
     }
 
@@ -136,6 +161,65 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         return new Vector3(float.Parse(positions[0]), float.Parse(positions[1]), float.Parse(positions[2]));
     }
 
+    void SeleccionarGanador()
+    {
+        if (!esperandoRespuestas) return;
+
+        esperandoRespuestas = false;
+
+        if (propuestas.Count == 0)
+        {
+            Debug.Log("Ningún guardián respondió");
+            return;
+        }
+
+        GameObject mejorGuardian = null;
+        float mejorValor = Mathf.Infinity;
+
+        foreach (var propuesta in propuestas)
+        {
+            if (propuesta.Value < mejorValor)
+            {
+                mejorValor = propuesta.Value;
+                mejorGuardian = propuesta.Key;
+            }
+        }
+
+        foreach (var propuesta in propuestas)
+        {
+            if (propuesta.Key == mejorGuardian)
+            {
+                AgenteComunicativo.EnviarDirecto(
+                    propuesta.Key,
+                    new Mensaje
+                    {
+                        Emisor = gameObject,
+                        Receptor = propuesta.Key,
+                        intencion = Intencion.AcceptProposal,
+                        IDConversacion = ID_actual
+                    });
+            }
+            else
+            {
+                AgenteComunicativo.EnviarDirecto(
+                    propuesta.Key,
+                    new Mensaje
+                    {
+                        Emisor = gameObject,
+                        Receptor = propuesta.Key,
+                        intencion = Intencion.RejectProposal,
+                        IDConversacion = ID_actual
+                    });
+            }
+        }
+
+        Debug.Log("Ganador: " + mejorGuardian.name);
+    }
+
+    public GameObject GetGameObject()
+    {
+        return gameObject;
+    }
 
     void OnDestroy()
     {
