@@ -96,8 +96,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             case Intencion.Cfp:
 
                 // calculamos primero la distancia del guardián al ladrón (contenido del mensaje)
-                Vector3 posicionLadron = LeerVector3(mensaje.Contenido);
-                float distancia = Vector3.Distance(transform.position, posicionLadron);
+                ultimaPosicionConocida = LeerVector3(mensaje.Contenido);
+                float distancia = Vector3.Distance(transform.position, ultimaPosicionConocida);
 
                 AgenteComunicativo.EnviarDirecto(
                     mensaje.Emisor,
@@ -113,8 +113,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 break;
 
             case Intencion.AcceptProposal:
-
-                ultimaPosicionConocida = posicionLadron;
+            
                 estado = perseguir;
                 perseguir.posicion = ultimaPosicionConocida;
 
