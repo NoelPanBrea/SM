@@ -37,6 +37,7 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
                 IDConversacion = ID_actual
             });
 
+        CancelInvoke(nameof(SeleccionarGanador));     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
         Invoke(nameof(SeleccionarGanador), 1.0f);
     }
 
@@ -119,4 +120,3 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
     }
     
 }
-

@@ -109,6 +109,22 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         {
             case Intencion.Cfp:
 
+                if (estado is Perseguir){
+                    AgenteComunicativo.EnviarDirecto(
+                    mensaje.Emisor,
+                    new Mensaje
+                    {
+                        Emisor = gameObject,
+                        Receptor = mensaje.Emisor,
+                        intencion = Intencion.Refuse,
+                        Contenido = "Rechazo tu CFP",
+                        IDConversacion = mensaje.IDConversacion
+                    });
+
+                    break;    
+                }
+
+
                 // calculamos primero la distancia del guardián al ladrón (contenido del mensaje)
                 ultimaPosicionConocida = LeerVector3(mensaje.Contenido);
                 float distancia = Vector3.Distance(transform.position, ultimaPosicionConocida);
@@ -128,6 +144,9 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
             case Intencion.AcceptProposal:
             
+                if (mensaje.IDConversacion != ID_actual)
+                    break;
+
                 estado = perseguir;
                 perseguir.posicion = ultimaPosicionConocida;
 
