@@ -91,15 +91,52 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
     public void RecibirMensaje(Mensaje mensaje)
     {
-        if (mensaje.intencion == Intencion.Inform)
+        switch (mensaje.intencion)
         {
-            Debug.Log(name + " recibe información: " + mensaje.Contenido);
+            case Intencion.Cfp:
 
-            ultimaPosicionConocida = mensaje.Emisor.transform.position;
-            estado = perseguir;
-            perseguir.posicion = ultimaPosicionConocida;
+                // calculamos primero la distancia del guardián al ladrón (contenido del mensaje)
+                Vector3 posicionLadron = LeerVector3(mensaje.Contenido);
+                float distancia = Vector3.Distance(transform.position, posicionLadron);
+
+                AgenteComunicativo.EnviarDirecto(
+                    mensaje.Emisor,
+                    new Mensaje
+                    {
+                        Emisor = gameObject,
+                        Receptor = mensaje.Emisor,
+                        intencion = Intencion.Propose,
+                        Contenido = distancia.ToString(),
+                        IDConversacion = mensaje.IDConversacion
+                    });
+
+                break;
+
+            case Intencion.AcceptProposal:
+
+                ultimaPosicionConocida = posicionLadron;
+                estado = perseguir;
+                perseguir.posicion = ultimaPosicionConocida;
+
+                Debug.Log(name + " aceptado para perseguir");
+
+                break;
+
+            case Intencion.RejectProposal:
+
+                Debug.Log(name + " rechazado");
+
+                break;
         }
     }
+
+    Vector3 LeerVector3(string texto)
+    {
+        string[] positions = texto.Split(',');
+
+        return new Vector3(float.Parse(positions[0]), float.Parse(positions[1]), float.Parse(positions[2]));
+    }
+
 
     void OnDestroy()
     {
