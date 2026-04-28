@@ -25,6 +25,9 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
     private Dictionary<GameObject, float> propuestas = new Dictionary<GameObject, float>();
     private int ID_actual = 0;
     private bool esperandoRespuestas = false;
+    private Dictionary<int, List<Mensaje>> historial_conversaciones = new Dictionary<int, List<Mensaje>>();
+    private Mensaje nuevo_mensaje;    // para cuando escribamos un mensaje nuevo podamos almacenarlo
+
 
     void Start()
     {
@@ -75,14 +78,17 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         ID_actual++;
         esperandoRespuestas = true;
 
-        AgenteComunicativo.EnviarBroadcast(
-            new Mensaje
+        nuevo_mensaje = new Mensaje
             {
                 Emisor = gameObject,
                 intencion = Intencion.Cfp,
                 Contenido = "Ladrón visto" + "|" + posicion.x + ";" + posicion.y + ";" + posicion.z,
                 IDConversacion = ID_actual
-            });
+            };
+
+        RegistrarEnHistorial(nuevo_mensaje);
+
+        AgenteComunicativo.EnviarBroadcast(nuevo_mensaje);
 
         CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
         Invoke("SeleccionarGanador", 1.0f);
@@ -110,16 +116,21 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         {
             case Intencion.Cfp:
 
+                RegistrarEnHistorial(mensaje);
+
                 if (estado is Perseguir){
-                    AgenteComunicativo.EnviarDirecto(
-                    mensaje.Emisor,
-                    new Mensaje
-                    {
-                        Emisor = gameObject,
-                        Receptor = mensaje.Emisor,
-                        intencion = Intencion.Refuse,
-                        IDConversacion = mensaje.IDConversacion
-                    });
+
+                    nuevo_mensaje = new Mensaje
+                        {
+                            Emisor = gameObject,
+                            Receptor = mensaje.Emisor,
+                            intencion = Intencion.Refuse,
+                            IDConversacion = mensaje.IDConversacion
+                        };
+
+                    RegistrarEnHistorial(nuevo_mensaje);
+
+                    AgenteComunicativo.EnviarDirecto(mensaje.Emisor, nuevo_mensaje);
 
                     break;    
                 }
@@ -130,16 +141,18 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 ultimaPosicionConocida = posicion;
                 float distancia = Vector3.Distance(transform.position, ultimaPosicionConocida);
 
-                AgenteComunicativo.EnviarDirecto(
-                    mensaje.Emisor,
-                    new Mensaje
-                    {
-                        Emisor = gameObject,
-                        Receptor = mensaje.Emisor,
-                        intencion = Intencion.Propose,
-                        Contenido = distancia.ToString(),
-                        IDConversacion = mensaje.IDConversacion
-                    });
+                nuevo_mensaje = new Mensaje
+                {
+                    Emisor = gameObject,
+                    Receptor = mensaje.Emisor,
+                    intencion = Intencion.Propose,
+                    Contenido = distancia.ToString(),
+                    IDConversacion = mensaje.IDConversacion
+                };
+
+                RegistrarEnHistorial(nuevo_mensaje);
+
+                AgenteComunicativo.EnviarDirecto(mensaje.Emisor, nuevo_mensaje);
 
                 break;
 
@@ -147,6 +160,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             
                 if (mensaje.IDConversacion != ID_actual)
                     break;
+
+                RegistrarEnHistorial(mensaje);
 
                 estado = perseguir;
                 perseguir.posicion = ultimaPosicionConocida;
@@ -157,6 +172,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
             case Intencion.RejectProposal:
 
+                RegistrarEnHistorial(mensaje);
+
                 Debug.Log(name + " rechazado");
 
                 break;
@@ -165,6 +182,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
                 if (mensaje.IDConversacion == ID_actual)
                 {
+                    RegistrarEnHistorial(mensaje);
                     float valor = float.Parse(mensaje.Contenido);
                     propuestas[mensaje.Emisor] = valor;
                     Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
@@ -198,6 +216,14 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         return (accion, new Vector3(x, y, z));
     }
 
+    private void RegistrarEnHistorial(Mensaje mensaje)
+    {
+        if (!historial_conversaciones.ContainsKey(mensaje.IDConversacion))
+        {
+            historial_conversaciones[mensaje.IDConversacion] = new List<Mensaje>();
+        }
+        historial_conversaciones[mensaje.IDConversacion].Add(mensaje);
+    }
 
     void SeleccionarGanador()
     {
@@ -227,27 +253,34 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         {
             if (propuesta.Key == mejorGuardian)
             {
-                AgenteComunicativo.EnviarDirecto(
-                    propuesta.Key,
-                    new Mensaje
+
+                nuevo_mensaje = new Mensaje
                     {
                         Emisor = gameObject,
                         Receptor = propuesta.Key,
                         intencion = Intencion.AcceptProposal,
                         IDConversacion = ID_actual
-                    });
+                    };
+
+                RegistrarEnHistorial(nuevo_mensaje);
+
+                AgenteComunicativo.EnviarDirecto(propuesta.Key, nuevo_mensaje);
+
+                
             }
             else
             {
-                AgenteComunicativo.EnviarDirecto(
-                    propuesta.Key,
-                    new Mensaje
+                nuevo_mensaje = new Mensaje
                     {
                         Emisor = gameObject,
                         Receptor = propuesta.Key,
                         intencion = Intencion.RejectProposal,
                         IDConversacion = ID_actual
-                    });
+                    };
+
+                RegistrarEnHistorial(nuevo_mensaje);
+
+                AgenteComunicativo.EnviarDirecto(propuesta.Key, nuevo_mensaje);
             }
         }
 

@@ -7,6 +7,8 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
     private Dictionary<GameObject, float> propuestas = new Dictionary<GameObject, float>();
     private int ID_actual = 0;
     private bool esperandoRespuestas = false;
+    private Dictionary<int, List<Mensaje>> historial_conversaciones = new Dictionary<int, List<Mensaje>>();
+    private Mensaje nuevo_mensaje;    // para cuando escribamos un mensaje nuevo podamos almacenarlo
 
 
     void Start()
@@ -28,14 +30,17 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
         ID_actual++;
         esperandoRespuestas = true;
 
-        AgenteComunicativo.EnviarBroadcast(
-            new Mensaje
+        nuevo_mensaje = new Mensaje
             {
                 Emisor = gameObject,
                 intencion = Intencion.Cfp,
                 Contenido = "Ladrón visto" + "|" + posicion.x + ";" + posicion.y + ";" + posicion.z,
                 IDConversacion = ID_actual
-            });
+            };
+
+        RegistrarEnHistorial(nuevo_mensaje);
+
+        AgenteComunicativo.EnviarBroadcast(nuevo_mensaje);
 
         CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
         Invoke("SeleccionarGanador", 1.0f);
@@ -69,32 +74,49 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
         {
             if (propuesta.Key == mejorGuardian)
             {
-                AgenteComunicativo.EnviarDirecto(
-                    propuesta.Key,
-                    new Mensaje
+
+                nuevo_mensaje = new Mensaje
                     {
                         Emisor = gameObject,
                         Receptor = propuesta.Key,
                         intencion = Intencion.AcceptProposal,
                         IDConversacion = ID_actual
-                    });
+                    };
+
+                RegistrarEnHistorial(nuevo_mensaje);
+
+                AgenteComunicativo.EnviarDirecto(propuesta.Key, nuevo_mensaje);
+
+                
             }
             else
             {
-                AgenteComunicativo.EnviarDirecto(
-                    propuesta.Key,
-                    new Mensaje
+                nuevo_mensaje = new Mensaje
                     {
                         Emisor = gameObject,
                         Receptor = propuesta.Key,
                         intencion = Intencion.RejectProposal,
                         IDConversacion = ID_actual
-                    });
+                    };
+
+                RegistrarEnHistorial(nuevo_mensaje);
+
+                AgenteComunicativo.EnviarDirecto(propuesta.Key, nuevo_mensaje);
             }
         }
 
         Debug.Log("Ganador: " + mejorGuardian.name);
     }
+
+    private void RegistrarEnHistorial(Mensaje mensaje)
+    {
+        if (!historial_conversaciones.ContainsKey(mensaje.IDConversacion))
+        {
+            historial_conversaciones[mensaje.IDConversacion] = new List<Mensaje>();
+        }
+        historial_conversaciones[mensaje.IDConversacion].Add(mensaje);
+    }
+
 
     public void RecibirMensaje(Mensaje mensaje)
     {
@@ -104,6 +126,7 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
             float valor = float.Parse(mensaje.Contenido);
 
             propuestas[mensaje.Emisor] = valor;
+            RegistrarEnHistorial(mensaje);
 
             Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
         }
