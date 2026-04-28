@@ -84,7 +84,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 IDConversacion = ID_actual
             });
 
-        Invoke(nameof(SeleccionarGanador), 1.0f);
+        CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
+        Invoke("SeleccionarGanador", 1.0f);
 
     }
 
