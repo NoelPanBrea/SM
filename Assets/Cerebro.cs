@@ -80,7 +80,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             {
                 Emisor = gameObject,
                 intencion = Intencion.Cfp,
-                Contenido = posicion.x + ";" + posicion.y + ";" + posicion.z,
+                Contenido = "Ladrón visto" + "|" + posicion.x + ";" + posicion.y + ";" + posicion.z,
                 IDConversacion = ID_actual
             });
 
@@ -118,7 +118,6 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                         Emisor = gameObject,
                         Receptor = mensaje.Emisor,
                         intencion = Intencion.Refuse,
-                        Contenido = "Rechazo tu CFP",
                         IDConversacion = mensaje.IDConversacion
                     });
 
@@ -127,7 +126,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
 
                 // calculamos primero la distancia del guardián al ladrón (contenido del mensaje)
-                ultimaPosicionConocida = LeerVector3(mensaje.Contenido);
+                var (accion, posicion) = LeerContenido(mensaje.Contenido);
+                ultimaPosicionConocida = posicion;
                 float distancia = Vector3.Distance(transform.position, ultimaPosicionConocida);
 
                 AgenteComunicativo.EnviarDirecto(
@@ -174,12 +174,30 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         }
     }
 
-    Vector3 LeerVector3(string texto)
-    {
-        string[] positions = texto.Split(';');
+    // Vector3 LeerVector(string texto)
+    // {
+    //     string[] posiciones = texto.Split('|');
 
-        return new Vector3(float.Parse(positions[0]), float.Parse(positions[1]), float.Parse(positions[2]));
+    //     return new Vector3(float.Parse(posiciones[0]), float.Parse(posiciones[1]), float.Parse(posiciones[2]));
+    // }
+
+
+    (string, Vector3) LeerContenido(string contenido)
+    {
+        string[] partes = contenido.Split("|");
+        
+        string accion = partes[0];
+        string posicion = partes[1];
+
+        string[] coords = posicion.Split(';');
+
+        float x = float.Parse(coords[0]);
+        float y = float.Parse(coords[1]);
+        float z = float.Parse(coords[2]);
+
+        return (accion, new Vector3(x, y, z));
     }
+
 
     void SeleccionarGanador()
     {
