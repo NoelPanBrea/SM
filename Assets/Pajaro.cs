@@ -37,8 +37,8 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
                 IDConversacion = ID_actual
             });
 
-        CancelInvoke(nameof(SeleccionarGanador));     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
-        Invoke(nameof(SeleccionarGanador), 1.0f);
+        CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
+        Invoke("SeleccionarGanador", 1.0f);
     }
 
     void SeleccionarGanador()
