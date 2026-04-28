@@ -80,7 +80,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             {
                 Emisor = gameObject,
                 intencion = Intencion.Cfp,
-                Contenido = posicion.x + "," + posicion.y + "," + posicion.z,
+                Contenido = posicion.x + ";" + posicion.y + ";" + posicion.z,
                 IDConversacion = ID_actual
             });
 
@@ -176,7 +176,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
     Vector3 LeerVector3(string texto)
     {
-        string[] positions = texto.Split(',');
+        string[] positions = texto.Split(';');
 
         return new Vector3(float.Parse(positions[0]), float.Parse(positions[1]), float.Parse(positions[2]));
     }

@@ -33,7 +33,7 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
             {
                 Emisor = gameObject,
                 intencion = Intencion.Cfp,
-                Contenido = posicion.x + "," + posicion.y + "," + posicion.z,
+                Contenido = posicion.x + ";" + posicion.y + ";" + posicion.z,
                 IDConversacion = ID_actual
             });
 
