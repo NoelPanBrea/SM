@@ -73,7 +73,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
 
-        Debug.Log(name + " ha visto al ladrón");
+        // Debug.Log(name + " ha visto al ladrón");
         propuestas.Clear();
         ID_actual++;
         esperandoRespuestas = true;
@@ -103,6 +103,11 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             investigar.posicion = puntoInvestigacion;
             tiempoUltimaInvestigación = Time.time;
         }
+    }
+
+    public void TrofeoAusente(bool trofeo_robado)
+    {
+        Debug.Log("TROFEO ROBADO EVENTO UNITY: " + trofeo_robado);
     }
 
     public void TocaAlLadron()
@@ -166,7 +171,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 estado = perseguir;
                 perseguir.posicion = ultimaPosicionConocida;
 
-                Debug.Log(name + " aceptado para perseguir");
+                // Debug.Log(name + " aceptado para perseguir");
 
                 break;
 
@@ -174,7 +179,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
                 RegistrarEnHistorial(mensaje);
 
-                Debug.Log(name + " rechazado");
+                // Debug.Log(name + " rechazado");
 
                 break;
 
@@ -185,20 +190,12 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                     RegistrarEnHistorial(mensaje);
                     float valor = float.Parse(mensaje.Contenido);
                     propuestas[mensaje.Emisor] = valor;
-                    Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
+                    // Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
                 }
 
                 break;
         }
     }
-
-    // Vector3 LeerVector(string texto)
-    // {
-    //     string[] posiciones = texto.Split('|');
-
-    //     return new Vector3(float.Parse(posiciones[0]), float.Parse(posiciones[1]), float.Parse(posiciones[2]));
-    // }
-
 
     (string, Vector3) LeerContenido(string contenido)
     {
@@ -233,7 +230,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
         if (propuestas.Count == 0)
         {
-            Debug.Log("Ningún guardián respondió");
+            // Debug.Log("Ningún guardián respondió");
             return;
         }
 
@@ -284,7 +281,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             }
         }
 
-        Debug.Log("Ganador: " + mejorGuardian.name);
+        // Debug.Log("Ganador: " + mejorGuardian.name);
     }
 
     public GameObject GetGameObject()
