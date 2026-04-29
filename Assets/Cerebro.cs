@@ -102,6 +102,25 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             estado = investigar;
             investigar.posicion = puntoInvestigacion;
             tiempoUltimaInvestigación = Time.time;
+
+            propuestas.Clear();
+            ID_actual++;
+            esperandoRespuestas = true;
+
+            nuevo_mensaje = new Mensaje
+                {
+                    Emisor = gameObject,
+                    intencion = Intencion.Cfp,
+                    Contenido = "Ladrón escuchado" + "|" + puntoInvestigacion.x + ";" + puntoInvestigacion.y + ";" + puntoInvestigacion.z,
+                    IDConversacion = ID_actual
+                };
+
+            RegistrarEnHistorial(nuevo_mensaje);
+
+            AgenteComunicativo.EnviarBroadcast(nuevo_mensaje);
+
+            CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
+            Invoke("SeleccionarGanador", 1.0f); 
         }
     }
 
@@ -117,11 +136,11 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
     public void RecibirMensaje(Mensaje mensaje)
     {
+        RegistrarEnHistorial(mensaje);
+
         switch (mensaje.intencion)
         {
             case Intencion.Cfp:
-
-                RegistrarEnHistorial(mensaje);
 
                 if (estado is Perseguir){
 
@@ -166,20 +185,28 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 if (mensaje.IDConversacion != ID_actual)
                     break;
 
-                RegistrarEnHistorial(mensaje);
+                var (accion2, posicion2) = LeerContenido(historial_conversaciones[ID_actual][0].Contenido);   // obtenemos del historial el contenido del CFP original de esa conversación
+                ultimaPosicionConocida = posicion2;
 
-                estado = perseguir;
-                perseguir.posicion = ultimaPosicionConocida;
+                if (accion2 is "Ladrón visto")
+                {
+                    estado = perseguir;
+                    perseguir.posicion = ultimaPosicionConocida;
+                    // Debug.Log(name + " aceptado para perseguir");
+                }
 
-                // Debug.Log(name + " aceptado para perseguir");
+                else if (accion2 is "Ladrón escuchado")
+                {
+                    estado = investigar;
+                    investigar.posicion = ultimaPosicionConocida;
+                    Debug.Log(name + " aceptado para investigar");
+                }
 
                 break;
 
             case Intencion.RejectProposal:
 
-                RegistrarEnHistorial(mensaje);
-
-                // Debug.Log(name + " rechazado");
+                Debug.Log(name + " rechazado");
 
                 break;
 
@@ -187,10 +214,9 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
                 if (mensaje.IDConversacion == ID_actual)
                 {
-                    RegistrarEnHistorial(mensaje);
                     float valor = float.Parse(mensaje.Contenido);
                     propuestas[mensaje.Emisor] = valor;
-                    // Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
+                    Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
                 }
 
                 break;
@@ -230,7 +256,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
         if (propuestas.Count == 0)
         {
-            // Debug.Log("Ningún guardián respondió");
+            Debug.Log("Ningún guardián respondió");
             return;
         }
 
@@ -281,7 +307,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             }
         }
 
-        // Debug.Log("Ganador: " + mejorGuardian.name);
+        Debug.Log("Ganador: " + mejorGuardian.name);
     }
 
     public GameObject GetGameObject()
