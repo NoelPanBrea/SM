@@ -24,7 +24,7 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
 
     public void VeAlLadron(Vector3 posicion)
     {
-        // Debug.Log("Pájaro ha visto al ladrón");
+        Debug.Log("Pájaro ha visto al ladrón");
 
         propuestas.Clear();
         ID_actual++;
@@ -105,7 +105,7 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
             }
         }
 
-        // Debug.Log("Ganador: " + mejorGuardian.name);
+        Debug.Log("Ganador: " + mejorGuardian.name);
     }
 
     private void RegistrarEnHistorial(Mensaje mensaje)
@@ -128,7 +128,7 @@ public class Pajaro : MonoBehaviour, InterfazAgenteComunicativo
             propuestas[mensaje.Emisor] = valor;
             RegistrarEnHistorial(mensaje);
 
-            // Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
+            Debug.Log("Propuesta de " + mensaje.Emisor.name + ": " + valor);
         }
     }
 

@@ -73,7 +73,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
 
-        // Debug.Log(name + " ha visto al ladrón");
+        Debug.Log(name + " ha visto al ladrón");
         propuestas.Clear();
         ID_actual++;
         esperandoRespuestas = true;
@@ -103,6 +103,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
             investigar.posicion = puntoInvestigacion;
             tiempoUltimaInvestigación = Time.time;
 
+            Debug.Log(name + " ha escuchado al ladrón");
             propuestas.Clear();
             ID_actual++;
             esperandoRespuestas = true;
@@ -126,8 +127,25 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
     public void TrofeoAusente(bool trofeo_robado)
     {
-        Debug.Log("TROFEO ROBADO EVENTO UNITY: " + trofeo_robado);
-    }
+        Debug.Log(name + " ha visto que han robado el tesoro");
+        propuestas.Clear();
+        ID_actual++;
+        esperandoRespuestas = true;
+
+        nuevo_mensaje = new Mensaje
+            {
+                Emisor = gameObject,
+                intencion = Intencion.Cfp,
+                Contenido = "Tesoro robado" + "|" + PuntoHuidaLadron.position.x + ";" + PuntoHuidaLadron.position.y + ";" + PuntoHuidaLadron.position.z,
+                IDConversacion = ID_actual
+            };
+
+        RegistrarEnHistorial(nuevo_mensaje);
+
+        AgenteComunicativo.EnviarBroadcast(nuevo_mensaje);
+
+        CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
+        Invoke("SeleccionarGanador", 1.0f);    }
 
     public void TocaAlLadron()
     {
@@ -192,7 +210,7 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                 {
                     estado = perseguir;
                     perseguir.posicion = ultimaPosicionConocida;
-                    // Debug.Log(name + " aceptado para perseguir");
+                    Debug.Log(name + " aceptado para perseguir");
                 }
 
                 else if (accion2 is "Ladrón escuchado")
@@ -200,6 +218,13 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
                     estado = investigar;
                     investigar.posicion = ultimaPosicionConocida;
                     Debug.Log(name + " aceptado para investigar");
+                }
+
+                else if (accion2 is "Tesoro robado")
+                {
+                    estado = perseguir;
+                    perseguir.posicion = ultimaPosicionConocida;
+                    Debug.Log(name + " aceptado para evitar que ladrón escape");
                 }
 
                 break;
