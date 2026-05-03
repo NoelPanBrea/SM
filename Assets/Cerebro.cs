@@ -47,7 +47,6 @@ public class Cerebro : MonoBehaviour
         {
            if (estado.TomarControl())
            {
-                Debug.Log(estado);
                 estado.Comportamiento();
                 break;
            }
@@ -81,18 +80,11 @@ public class Cerebro : MonoBehaviour
         comunicacion.CFP_TesoroRobado(PuntoHuidaLadron.position);
     }
 
-
-    public void IrAPerseguir(Vector3 pos)
-    {
-        estado = perseguir;
-        perseguir.posicion = pos;
-    }
-
-
     public void IrAInvestigar(Vector3 pos)
-    {
-        estado = investigar;
+    {   
+        investigar.comunicando = true;
         investigar.posicion = pos;
+        patrullar.AñadirPuntoPatrulla(pos);
     }
 
 

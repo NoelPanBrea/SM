@@ -9,6 +9,7 @@ public class Investigar : Estado
     private NavMeshAgent agent;
     public Oido oido;
     public float cooldown;
+    public bool comunicando;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -16,17 +17,19 @@ public class Investigar : Estado
         agent = GetComponent<NavMeshAgent>();
         oido = GetComponent<Oido>();
         cooldown = -100;
+        comunicando = false;
     }
 
     public override bool TomarControl() 
     {
+        // Debug.Log(comunicando);
         bool escuchado = oido.EscuchaAlLadron();
         if (escuchado)
         {
             cooldown = Time.time;
-            posicion = oido.puntoInvestigacion;
+            posicion = comunicando ? posicion : oido.puntoInvestigacion;
         }
-        return escuchado || Time.time - cooldown < 10f;
+        return escuchado || Time.time - cooldown < 10f || comunicando;
     }
 
     public override void Comportamiento()

@@ -19,7 +19,7 @@ public class Comprobar : Estado
 
     void Start()
     {
-        delay = Random.Range(10f, 20f);
+        delay = Random.Range(20f, 25f);
         trofeo_robado ??= new UnityEvent<bool>();
         cerebro = GetComponent<Cerebro>();
         if (cerebro != null) trofeo_robado.AddListener(cerebro.TrofeoAusente);
@@ -29,7 +29,7 @@ public class Comprobar : Estado
 
     public override bool TomarControl() 
     {
-        bool time_elapsed = Time.time - cooldown > 20;
+        bool time_elapsed = Time.time - cooldown > delay;
         if (time_elapsed) 
         {
             comprobado = false;

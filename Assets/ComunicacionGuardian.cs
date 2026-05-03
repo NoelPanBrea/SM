@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class ComunicacionGuardian : MonoBehaviour, InterfazAgenteComunicativo
 {
@@ -64,7 +65,8 @@ public class ComunicacionGuardian : MonoBehaviour, InterfazAgenteComunicativo
     public void RecibirMensaje(Mensaje mensaje)
     {
         RegistrarEnHistorial(mensaje);
-
+        
+        Debug.Log(mensaje.IDConversacion + " " + mensaje.intencion);
         switch (mensaje.intencion)
         {
             case Intencion.Cfp:
@@ -133,14 +135,12 @@ public class ComunicacionGuardian : MonoBehaviour, InterfazAgenteComunicativo
 
     void ProcesarAcceptProposal(Mensaje mensaje)
     {
-        if (mensaje.IDConversacion != ID_actual) return;
-
         var (accion, posicion) =
-            LeerContenido(historial_conversaciones[ID_actual][0].Contenido);
+            LeerContenido(historial_conversaciones[historial_conversaciones.Keys.Last()][0].Contenido);
 
         if (accion == "Ladrón visto" || accion == "Tesoro robado")
         {
-            cerebro.IrAPerseguir(posicion);
+            cerebro.IrAInvestigar(posicion);
         }
         else if (accion == "Ladrón escuchado")
         {
@@ -183,7 +183,7 @@ public class ComunicacionGuardian : MonoBehaviour, InterfazAgenteComunicativo
                     : Intencion.RejectProposal,
                 IDConversacion = ID_actual
             };
-
+            if (propuesta.Key == mejorGuardian) {Debug.Log(name + " ganador");}
             RegistrarEnHistorial(nuevo_mensaje);
             AgenteComunicativo.EnviarDirecto(propuesta.Key, nuevo_mensaje);
         }
