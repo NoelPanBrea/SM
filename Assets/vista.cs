@@ -29,11 +29,16 @@ public class Vista : MonoBehaviour
         origen = transform.position + Vector3.up * 1.5f;
         direccion = posicionladron.position - origen;
         direccion2d = new Vector2(direccion[0], direccion[2]);
-        if (EnRango() && EnAngulo() && SinObstaculos())
+        if (VeAlLadron())
         {
             visto.Invoke(posicionladron.position);
 
         }
+    }
+
+    public bool VeAlLadron()
+    {
+        return EnRango() && EnAngulo() && SinObstaculos();
     }
 
     bool EnRango()

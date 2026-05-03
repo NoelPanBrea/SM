@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 {
     public Estado estado;
+    public List<Estado> lista_estados;
     public Patrullar patrullar;
     public Investigar investigar;
     public Perseguir perseguir;
@@ -30,13 +31,14 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
 
     void Start()
-    {
+    {   
         AgenteComunicativo.RegistrarAgente(this);
         agent = GetComponent<NavMeshAgent>();
         patrullar = GetComponent<Patrullar>();
         perseguir = GetComponent<Perseguir>();
         investigar = GetComponent<Investigar>();
         comprobar = GetComponent<Comprobar>();
+        lista_estados = new List<Estado> {perseguir, investigar, comprobar, patrullar};
         ultimaPosicionConocida = transform.position;
         tiempoUltimaComprobacion = Time.time;
         estado = patrullar;
@@ -45,35 +47,29 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
 
     void Update()
     {
-        if (Time.time - tiempoUltimaVision > 16f && Time.time - tiempoUltimaInvestigación > 16f
-         && Time.time - tiempoUltimaComprobacion > 20f && estado is not Perseguir && estado is not Investigar)
+        CambiarComportamiento();
+    }
+
+    public void CambiarComportamiento()
+    {
+        foreach (Estado estado in lista_estados)
         {
-            estado = comprobar;
-            tiempoUltimaComprobacion = (comprobar.comprobado & !comprobar.ladron.tieneTesoro) ? Time.time : tiempoUltimaComprobacion;
-            comprobar.comprobado = false;
+           if (estado.TomarControl())
+           {
+                Debug.Log(estado);
+                estado.Comportamiento();
+                break;
+           }
         }
-        else if (Time.time - tiempoUltimaVision > 8f && Time.time - tiempoUltimaInvestigación > 8f)
-        {
-            estado = patrullar;
-            patrullar.AñadirPuntoPatrulla(ultimaPosicionConocida);
-        }
-        else if (estado is not Investigar)
-        {
-            estado = investigar;
-            investigar.posicion = ultimaPosicionConocida;
-            tiempoUltimaInvestigación = Time.time;
-        }
-        estado.Comportamiento();
     }
 
     public void VeAlLadron(Vector3 posicion)
     {
         estado = perseguir;
-        perseguir.posicion = posicion;
         ultimaPosicionConocida = posicion;
         tiempoUltimaVision = Time.time;
 
-        Debug.Log(name + " ha visto al ladrón");
+        // Debug.Log(name + " ha visto al ladrón");
         propuestas.Clear();
         ID_actual++;
         esperandoRespuestas = true;
@@ -100,10 +96,9 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         if (estado is not Perseguir)
         {
             estado = investigar;
-            investigar.posicion = puntoInvestigacion;
             tiempoUltimaInvestigación = Time.time;
 
-            Debug.Log(name + " ha escuchado al ladrón");
+            // Debug.Log(name + " ha escuchado al ladrón");
             propuestas.Clear();
             ID_actual++;
             esperandoRespuestas = true;
@@ -145,7 +140,8 @@ public class Cerebro : MonoBehaviour, InterfazAgenteComunicativo
         AgenteComunicativo.EnviarBroadcast(nuevo_mensaje);
 
         CancelInvoke("SeleccionarGanador");     // cancelamos selecciones pasadas para que no acepte propuestas antiguas
-        Invoke("SeleccionarGanador", 1.0f);    }
+        Invoke("SeleccionarGanador", 1.0f);
+    }
 
     public void TocaAlLadron()
     {

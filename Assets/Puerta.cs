@@ -4,24 +4,25 @@ public class Puerta : MonoBehaviour
 {
     public Vector3 openOffset = new Vector3(-7f, 0, 0); 
     public float speed = 2f;
-    public float opendelay;
+    public float opendelay = 10f;
     private Vector3 closedPosition;
     private Vector3 targetPosition;
+    private float t2;
     private bool open = false;
 
     void Start()
     {
         closedPosition = transform.position;
         targetPosition = closedPosition;
-        opendelay = Time.time;
+        t2 = Time.time;
     }
 
     void Update()
     {
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * speed);
-        if (Time.time - opendelay > 10f)
+        if (Time.time - t2 > opendelay)
         {
-            opendelay = Time.time;
+            t2 = Time.time;
             ToggleDoor();
         }
     }

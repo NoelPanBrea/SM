@@ -66,4 +66,8 @@ public class Patrullar : Estado
             puntos.RemoveAt(indiceMasLejano);
         }
     }
+    public override bool TomarControl()
+    {
+        return true;
+    }
 }

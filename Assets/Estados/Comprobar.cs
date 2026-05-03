@@ -12,15 +12,30 @@ public class Comprobar : Estado
     private UnityEvent<bool> trofeo_robado;
     private NavMeshAgent agent;
     public bool trofeoausente = false;
-    public bool comprobado = false;
+    public bool comprobado = true;
+    public float cooldown;
+    private float delay;
 
 
     void Start()
     {
+        delay = Random.Range(10f, 20f);
         trofeo_robado ??= new UnityEvent<bool>();
         cerebro = GetComponent<Cerebro>();
         if (cerebro != null) trofeo_robado.AddListener(cerebro.TrofeoAusente);
         agent = GetComponent<NavMeshAgent>();
+        cooldown = Time.time;
+    }
+
+    public override bool TomarControl() 
+    {
+        bool time_elapsed = Time.time - cooldown > 20;
+        if (time_elapsed) 
+        {
+            comprobado = false;
+            cooldown = Time.time;
+        }
+        return time_elapsed || !comprobado || trofeoausente;
     }
 
     public override void Comportamiento()
