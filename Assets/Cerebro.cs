@@ -43,12 +43,7 @@ public class Cerebro : MonoBehaviour
 
     void Update()
     {
-        CambiarComportamiento();
-    }
-
-    public void CambiarComportamiento()
-    {
-        foreach (Estado estado in lista_estados)
+         foreach (Estado estado in lista_estados)
         {
            if (estado.TomarControl())
            {
